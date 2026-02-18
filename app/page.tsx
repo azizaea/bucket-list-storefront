@@ -1,3 +1,5 @@
+import { headers } from "next/headers";
+
 const API_BASE = "https://api.bucketlist.sa/api/guide-stores/public";
 
 interface GuideStoreResponse {
@@ -53,8 +55,9 @@ export default async function StorePage({
 }: {
   searchParams: Promise<{ slug?: string }>;
 }) {
+  const headersList = await headers();
   const params = await searchParams;
-  const slug = params.slug;
+  const slug = headersList.get("x-slug") || params.slug;
 
   if (!slug) {
     return <StoreNotFound />;
