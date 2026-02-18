@@ -1,6 +1,44 @@
 import { headers } from "next/headers";
+import Link from "next/link";
+import { fetchTours } from "@/lib/api";
 
 const API_BASE = "https://api.bucketlist.sa/api/guide-stores/public";
+
+function ClockIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+  );
+}
+
+function PeopleIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+      />
+    </svg>
+  );
+}
 
 interface GuideStoreResponse {
   success: boolean;
@@ -12,20 +50,6 @@ interface GuideStoreResponse {
       aboutText?: string;
     };
   };
-}
-
-interface Tour {
-  id: string;
-  title: string;
-  price: number;
-  currency: string;
-  maxGuests: number;
-  duration: number;
-}
-
-interface ToursResponse {
-  success: boolean;
-  data: { tours: Tour[] };
 }
 
 async function fetchGuideStore(
@@ -41,20 +65,6 @@ async function fetchGuideStore(
     return json.data;
   } catch {
     return null;
-  }
-}
-
-async function fetchTours(slug: string): Promise<Tour[]> {
-  try {
-    const res = await fetch(`${API_BASE}/${slug}/tours`, {
-      next: { revalidate: 60 },
-    });
-    if (!res.ok) return [];
-    const json: ToursResponse = await res.json();
-    if (!json.success || !json.data?.tours) return [];
-    return json.data.tours;
-  } catch {
-    return [];
   }
 }
 
@@ -144,27 +154,43 @@ export default async function StorePage({
               No tours available yet. Check back soon!
             </p>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {tours.map((tour) => (
-                <div
+                <Link
                   key={tour.id}
-                  className="rounded-2xl border border-gray-200 bg-white p-6"
+                  href={`/tour/${tour.id}?slug=${slug}`}
+                  className="group block overflow-hidden rounded-2xl border border-gray-200 bg-white transition-shadow hover:shadow-lg"
                 >
-                  <h4 className="font-bold text-black">{tour.title}</h4>
-                  <ul className="mt-3 space-y-1 text-sm text-gray-600">
-                    <li>{tour.duration} hours</li>
-                    <li>Up to {tour.maxGuests} guests</li>
-                    <li>
-                      {tour.price} {tour.currency}
-                    </li>
-                  </ul>
-                  <button
-                    type="button"
-                    className="mt-4 w-full rounded-lg bg-black px-4 py-2 font-medium text-white transition-colors hover:bg-gray-800"
-                  >
-                    Book Now
-                  </button>
-                </div>
+                  <div className="aspect-[4/3] overflow-hidden bg-gray-200">
+                    {tour.coverImage ? (
+                      <img
+                        src={tour.coverImage}
+                        alt={tour.title}
+                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-gray-300 text-gray-500">
+                        No image
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h4 className="font-bold text-black">{tour.title}</h4>
+                    <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
+                      <span className="flex items-center gap-1">
+                        <ClockIcon className="h-4 w-4" />
+                        {tour.duration} hours
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <PeopleIcon className="h-4 w-4" />
+                        Up to {tour.maxGuests} guests
+                      </span>
+                    </div>
+                    <p className="mt-3 font-bold text-black">
+                      From {tour.price} {tour.currency}
+                    </p>
+                  </div>
+                </Link>
               ))}
             </div>
           )}
