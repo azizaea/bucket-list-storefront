@@ -1,64 +1,112 @@
-import Image from "next/image";
+const API_BASE = "https://api.bucketlist.sa/api/guide-stores/public";
 
-export default function Home() {
+interface GuideStoreResponse {
+  success: boolean;
+  data: {
+    guide: { fullName: string; storeSlug: string };
+    store: {
+      storeName: string;
+      primaryColor?: string;
+      aboutText?: string;
+    };
+  };
+}
+
+async function fetchGuideStore(
+  slug: string
+): Promise<GuideStoreResponse["data"] | null> {
+  try {
+    const res = await fetch(`${API_BASE}/${slug}`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return null;
+    const json: GuideStoreResponse = await res.json();
+    if (!json.success || !json.data) return null;
+    return json.data;
+  } catch {
+    return null;
+  }
+}
+
+function StoreNotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold text-gray-300">404</h1>
+        <h2 className="mt-4 text-2xl font-semibold text-gray-800">
+          Store not found
+        </h2>
+        <p className="mt-2 text-gray-600">
+          The guide store you&apos;re looking for doesn&apos;t exist or has been
+          removed.
+        </p>
+        <p className="mt-6 text-sm text-gray-500">
+          Try visiting with a valid slug, e.g. ?slug=ahmed
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default async function StorePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ slug?: string }>;
+}) {
+  const params = await searchParams;
+  const slug = params.slug;
+
+  if (!slug) {
+    return <StoreNotFound />;
+  }
+
+  const data = await fetchGuideStore(slug);
+
+  if (!data) {
+    return <StoreNotFound />;
+  }
+
+  const { guide, store } = data;
+  const storeName = store.storeName || "Guide Store";
+  const aboutText = store.aboutText || "";
+  const guideName = guide.fullName || "Your Guide";
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="bg-black px-6 py-6 text-white shadow-lg">
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+          {storeName}
+        </h1>
+      </header>
+
+      <main className="mx-auto max-w-4xl px-6 py-12">
+        {/* Hero / About */}
+        <section className="mb-16">
+          <p className="text-sm font-medium uppercase tracking-wider text-gray-500">
+            Meet your guide
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          <h2 className="mt-2 text-3xl font-bold text-black md:text-4xl">
+            {guideName}
+          </h2>
+          {aboutText && (
+            <div className="mt-6 max-w-2xl">
+              <p className="whitespace-pre-line text-lg leading-relaxed text-gray-600">
+                {aboutText}
+              </p>
+            </div>
+          )}
+        </section>
+
+        {/* Book a Tour placeholder */}
+        <section className="rounded-2xl border border-gray-200 bg-white p-8 md:p-12">
+          <h3 className="text-xl font-semibold text-black">
+            Book a Tour
+          </h3>
+          <p className="mt-2 text-gray-600">
+            Tours and experiences coming soon. Check back later!
+          </p>
+        </section>
       </main>
     </div>
   );
