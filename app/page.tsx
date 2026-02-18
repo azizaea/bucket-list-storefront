@@ -14,6 +14,20 @@ interface GuideStoreResponse {
   };
 }
 
+interface Tour {
+  id: string;
+  title: string;
+  price: number;
+  currency: string;
+  maxGuests: number;
+  duration: number;
+}
+
+interface ToursResponse {
+  success: boolean;
+  data: { tours: Tour[] };
+}
+
 async function fetchGuideStore(
   slug: string
 ): Promise<GuideStoreResponse["data"] | null> {
@@ -27,6 +41,20 @@ async function fetchGuideStore(
     return json.data;
   } catch {
     return null;
+  }
+}
+
+async function fetchTours(slug: string): Promise<Tour[]> {
+  try {
+    const res = await fetch(`${API_BASE}/${slug}/tours`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return [];
+    const json: ToursResponse = await res.json();
+    if (!json.success || !json.data?.tours) return [];
+    return json.data.tours;
+  } catch {
+    return [];
   }
 }
 
@@ -69,7 +97,12 @@ export default async function StorePage({
     return <StoreNotFound />;
   }
 
-  const { guide, store } = data;
+  const [storeData, tours] = await Promise.all([
+    Promise.resolve(data),
+    fetchTours(slug),
+  ]);
+
+  const { guide, store } = storeData;
   const storeName = store.storeName || "Guide Store";
   const aboutText = store.aboutText || "";
   const guideName = guide.fullName || "Your Guide";
@@ -101,14 +134,40 @@ export default async function StorePage({
           )}
         </section>
 
-        {/* Book a Tour placeholder */}
-        <section className="rounded-2xl border border-gray-200 bg-white p-8 md:p-12">
-          <h3 className="text-xl font-semibold text-black">
+        {/* Tours */}
+        <section>
+          <h3 className="mb-6 text-xl font-semibold text-black">
             Book a Tour
           </h3>
-          <p className="mt-2 text-gray-600">
-            Tours and experiences coming soon. Check back later!
-          </p>
+          {tours.length === 0 ? (
+            <p className="rounded-2xl border border-gray-200 bg-white p-8 text-gray-600">
+              No tours available yet. Check back soon!
+            </p>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2">
+              {tours.map((tour) => (
+                <div
+                  key={tour.id}
+                  className="rounded-2xl border border-gray-200 bg-white p-6"
+                >
+                  <h4 className="font-bold text-black">{tour.title}</h4>
+                  <ul className="mt-3 space-y-1 text-sm text-gray-600">
+                    <li>{tour.duration} hours</li>
+                    <li>Up to {tour.maxGuests} guests</li>
+                    <li>
+                      {tour.price} {tour.currency}
+                    </li>
+                  </ul>
+                  <button
+                    type="button"
+                    className="mt-4 w-full rounded-lg bg-black px-4 py-2 font-medium text-white transition-colors hover:bg-gray-800"
+                  >
+                    Book Now
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       </main>
     </div>
