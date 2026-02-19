@@ -236,6 +236,8 @@ export default async function TourDetailPage({
                 price={tour.price}
                 currency={tour.currency}
                 maxGuests={tour.maxGuests}
+                slug={slug}
+                tourId={tour.id}
               />
             </div>
           </div>

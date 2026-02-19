@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { BookingModal } from "@/app/components/BookingModal";
 
 interface TourBookingWidgetProps {
   title: string;
   price: number;
   currency: string;
   maxGuests: number;
+  slug: string;
+  tourId: string;
 }
 
 export function TourBookingWidget({
@@ -14,9 +17,12 @@ export function TourBookingWidget({
   price,
   currency,
   maxGuests,
+  slug,
+  tourId,
 }: TourBookingWidgetProps) {
   const [date, setDate] = useState("");
   const [guests, setGuests] = useState(1);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const total = guests * price;
 
@@ -76,10 +82,20 @@ export function TourBookingWidget({
 
         <button
           type="button"
+          onClick={() => setModalOpen(true)}
           className="w-full rounded-lg bg-black px-4 py-3 font-medium text-white transition-colors hover:bg-gray-800"
         >
           Request to Book
         </button>
+
+        {modalOpen && (
+          <BookingModal
+            slug={slug}
+            tourId={tourId}
+            maxGuests={maxGuests}
+            onClose={() => setModalOpen(false)}
+          />
+        )}
 
         <button
           type="button"
