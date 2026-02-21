@@ -55,7 +55,9 @@ interface GuideStoreResponse {
     };
     store: {
       storeName: string;
+      logoUrl?: string | null;
       primaryColor?: string;
+      heroImageUrl?: string | null;
       aboutText?: string;
     };
   };
@@ -90,18 +92,6 @@ function PinIcon({ className }: { className?: string }) {
         strokeWidth={2}
         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
       />
-    </svg>
-  );
-}
-
-function StarIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
     </svg>
   );
 }
@@ -170,131 +160,170 @@ export default async function StorePage({
   const storeName = store.storeName || "Guide Store";
   const aboutText = store.aboutText || "";
   const guideName = guide.fullName || "Your Guide";
+  const heroBg = store.heroImageUrl
+    ? `url(${store.heroImageUrl})`
+    : store.primaryColor || "#1f2937";
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-black px-6 py-6 text-white shadow-lg">
-        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-          {storeName}
-        </h1>
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-50 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
+        <div className="flex items-center gap-3">
+          {store.logoUrl ? (
+            <img
+              src={store.logoUrl}
+              alt={storeName}
+              className="h-10 w-10 rounded-full object-cover"
+            />
+          ) : (
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-800 text-sm font-semibold text-white">
+              {getInitials(storeName)}
+            </div>
+          )}
+          <h1 className="text-lg font-bold text-black md:text-xl">{storeName}</h1>
+        </div>
+        <nav className="flex items-center gap-6">
+          <a
+            href="#tours"
+            className="text-sm font-medium text-gray-600 hover:text-black"
+          >
+            Tours
+          </a>
+          <a
+            href="#about"
+            className="text-sm font-medium text-gray-600 hover:text-black"
+          >
+            About
+          </a>
+        </nav>
       </header>
 
-      <main className="mx-auto max-w-4xl px-6 py-12">
-        {/* Hero / About */}
-        <section className="mb-16">
-          <p className="text-sm font-medium uppercase tracking-wider text-gray-500">
-            Meet your guide
-          </p>
-          <h2 className="mt-2 text-3xl font-bold text-black md:text-4xl">
+      {/* Hero Section */}
+      <section
+        className="relative flex min-h-[70vh] flex-col items-center justify-center px-6 py-20"
+        style={
+          store.heroImageUrl
+            ? {
+                backgroundImage: `url(${store.heroImageUrl})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }
+            : { backgroundColor: heroBg }
+        }
+      >
+        {store.heroImageUrl && (
+          <div
+            className="absolute inset-0 bg-black/50"
+            aria-hidden
+          />
+        )}
+        <div className="relative z-10 max-w-2xl text-center">
+          <h2 className="text-4xl font-bold text-white drop-shadow-lg md:text-5xl lg:text-6xl">
             {guideName}
           </h2>
           {aboutText && (
-            <div className="mt-6 max-w-2xl">
-              <p className="whitespace-pre-line text-lg leading-relaxed text-gray-600">
-                {aboutText}
-              </p>
-            </div>
-          )}
-        </section>
-
-        {/* Tours */}
-        <section>
-          <h3 className="mb-6 text-xl font-semibold text-black">
-            Book a Tour
-          </h3>
-          {tours.length === 0 ? (
-            <p className="rounded-2xl border border-gray-200 bg-white p-8 text-gray-600">
-              No tours available yet. Check back soon!
+            <p className="mt-4 text-lg text-white/95 drop-shadow md:text-xl">
+              {aboutText}
             </p>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {tours.map((tour) => (
-                <Link
-                  key={tour.id}
-                  href={`/tour/${tour.id}?slug=${slug}`}
-                  className="group block overflow-hidden rounded-2xl border border-gray-200 bg-white transition-shadow hover:shadow-lg"
-                >
-                  <div className="aspect-[4/3] overflow-hidden bg-gray-200">
-                    {tour.coverImage ? (
-                      <img
-                        src={tour.coverImage}
-                        alt={tour.title}
-                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gray-300 text-gray-500">
-                        No image
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h4 className="font-bold text-black">{tour.title}</h4>
-                    <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
-                      <span className="flex items-center gap-1">
-                        <ClockIcon className="h-4 w-4" />
-                        {tour.duration} hours
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <PeopleIcon className="h-4 w-4" />
-                        Up to {tour.maxGuests} guests
-                      </span>
-                    </div>
-                    <p className="mt-3 font-bold text-black">
-                      From {tour.price} {tour.currency}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
           )}
+          <a
+            href="#tours"
+            className="mt-8 inline-block rounded-lg bg-white px-8 py-3 font-semibold text-black transition-colors hover:bg-gray-100"
+          >
+            Explore Tours
+          </a>
+        </div>
+      </section>
+
+      <main>
+        {/* Tours Section */}
+        <section id="tours" className="scroll-mt-20 px-6 py-16">
+          <div className="mx-auto max-w-6xl">
+            <h3 className="mb-8 text-2xl font-bold text-black">Tours</h3>
+            {tours.length === 0 ? (
+              <p className="rounded-2xl border border-gray-200 bg-white p-8 text-gray-600">
+                No tours available yet. Check back soon!
+              </p>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {tours.map((tour) => (
+                  <Link
+                    key={tour.id}
+                    href={`/tour/${tour.id}?slug=${slug}`}
+                    className="group block overflow-hidden rounded-2xl border border-gray-200 bg-white transition-shadow hover:shadow-lg"
+                  >
+                    <div className="aspect-[4/3] overflow-hidden bg-gray-200">
+                      {tour.coverImage ? (
+                        <img
+                          src={tour.coverImage}
+                          alt={tour.title}
+                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gray-300 text-gray-500">
+                          No image
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h4 className="font-bold text-black">{tour.title}</h4>
+                      <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
+                        <span className="flex items-center gap-1">
+                          <ClockIcon className="h-4 w-4" />
+                          {tour.duration} hours
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <PeopleIcon className="h-4 w-4" />
+                          Up to {tour.maxGuests} guests
+                        </span>
+                      </div>
+                      <p className="mt-3 font-bold text-black">
+                        From {tour.price} {tour.currency}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
 
         {/* Meet Your Guide - only show if bio, languages, or specialties has data */}
         {(guide.bio || (guide.languages?.length ?? 0) > 0 || (guide.specialties?.length ?? 0) > 0) && (
-          <section className="mt-16">
-            <h3 className="mb-6 text-xl font-semibold text-black">
-              Meet Your Guide
-            </h3>
-            <div className="flex flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-6 sm:flex-row sm:items-start">
-              <div className="shrink-0">
+          <section id="about" className="scroll-mt-20 border-t border-gray-200 bg-gray-50 px-6 py-16">
+            <div className="mx-auto flex max-w-4xl flex-col gap-8 md:flex-row md:items-start">
+              <div className="shrink-0 md:w-1/3">
                 {guide.profilePictureUrl ? (
                   <img
                     src={guide.profilePictureUrl}
                     alt={guideName}
-                    className="h-24 w-24 rounded-full object-cover"
+                    className="mx-auto h-48 w-48 rounded-full object-cover md:mx-0"
                   />
                 ) : (
-                  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gray-200 text-lg font-semibold text-gray-600">
+                  <div className="mx-auto flex h-48 w-48 items-center justify-center rounded-full bg-gray-300 text-4xl font-semibold text-gray-600 md:mx-0">
                     {getInitials(guide.fullName || "G")}
                   </div>
                 )}
               </div>
-              <div className="min-w-0 flex-1">
-                <h4 className="font-bold text-black">{guideName}</h4>
+              <div className="min-w-0 flex-1 md:w-2/3">
+                <h3 className="text-2xl font-bold text-black">{guideName}</h3>
                 {guide.location && (
-                  <p className="mt-1 flex items-center gap-1.5 text-sm text-gray-600">
+                  <p className="mt-2 flex items-center gap-1.5 text-gray-600">
                     <PinIcon className="h-4 w-4 shrink-0" />
                     {guide.location}
                   </p>
                 )}
-                {guide.rating != null && (
-                  <p className="mt-1 flex items-center gap-1 text-sm text-gray-600">
-                    <StarIcon className="h-4 w-4 shrink-0 text-gray-700" />
-                    {guide.rating} / 5
-                  </p>
-                )}
                 {guide.bio && (
-                  <p className="mt-3 text-gray-600">{guide.bio}</p>
+                  <p className="mt-4 text-gray-600">{guide.bio}</p>
                 )}
                 {guide.languages && guide.languages.length > 0 && (
-                  <div className="mt-3">
+                  <div className="mt-4">
                     <span className="text-sm font-medium text-gray-700">Languages: </span>
                     <div className="mt-1 flex flex-wrap gap-2">
                       {guide.languages.map((lang) => (
                         <span
                           key={lang}
-                          className="rounded-full border border-gray-300 bg-gray-50 px-3 py-0.5 text-sm text-gray-700"
+                          className="rounded-full border border-gray-300 bg-white px-3 py-0.5 text-sm text-gray-700"
                         >
                           {lang}
                         </span>
@@ -303,13 +332,13 @@ export default async function StorePage({
                   </div>
                 )}
                 {guide.specialties && guide.specialties.length > 0 && (
-                  <div className="mt-3">
+                  <div className="mt-4">
                     <span className="text-sm font-medium text-gray-700">Specialties: </span>
                     <div className="mt-1 flex flex-wrap gap-2">
                       {guide.specialties.map((spec) => (
                         <span
                           key={spec}
-                          className="rounded-full border border-gray-300 bg-gray-50 px-3 py-0.5 text-sm text-gray-700"
+                          className="rounded-full border border-gray-300 bg-white px-3 py-0.5 text-sm text-gray-700"
                         >
                           {spec}
                         </span>
@@ -321,6 +350,17 @@ export default async function StorePage({
             </div>
           </section>
         )}
+
+        {/* Footer */}
+        <footer className="border-t border-gray-200 bg-white px-6 py-8">
+          <div className="mx-auto max-w-4xl text-center">
+            <p className="font-semibold text-black">{storeName}</p>
+            <p className="mt-1 text-sm text-gray-500">Powered by Bucket List</p>
+            <p className="mt-4 text-xs text-gray-400">
+              © {new Date().getFullYear()} Bucket List. All rights reserved.
+            </p>
+          </div>
+        </footer>
       </main>
     </div>
   );
