@@ -43,13 +43,67 @@ function PeopleIcon({ className }: { className?: string }) {
 interface GuideStoreResponse {
   success: boolean;
   data: {
-    guide: { fullName: string; storeSlug: string };
+    guide: {
+      fullName: string;
+      storeSlug: string;
+      profilePictureUrl?: string | null;
+      location?: string | null;
+      rating?: number | null;
+      bio?: string | null;
+      languages?: string[];
+      specialties?: string[];
+    };
     store: {
       storeName: string;
       primaryColor?: string;
       aboutText?: string;
     };
   };
+}
+
+function getInitials(name: string): string {
+  return name
+    .split(/\s+/)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+function PinIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+    </svg>
+  );
+}
+
+function StarIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+    </svg>
+  );
 }
 
 async function fetchGuideStore(
@@ -195,6 +249,78 @@ export default async function StorePage({
             </div>
           )}
         </section>
+
+        {/* Meet Your Guide - only show if bio, languages, or specialties has data */}
+        {(guide.bio || (guide.languages?.length ?? 0) > 0 || (guide.specialties?.length ?? 0) > 0) && (
+          <section className="mt-16">
+            <h3 className="mb-6 text-xl font-semibold text-black">
+              Meet Your Guide
+            </h3>
+            <div className="flex flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-6 sm:flex-row sm:items-start">
+              <div className="shrink-0">
+                {guide.profilePictureUrl ? (
+                  <img
+                    src={guide.profilePictureUrl}
+                    alt={guideName}
+                    className="h-24 w-24 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gray-200 text-lg font-semibold text-gray-600">
+                    {getInitials(guide.fullName || "G")}
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <h4 className="font-bold text-black">{guideName}</h4>
+                {guide.location && (
+                  <p className="mt-1 flex items-center gap-1.5 text-sm text-gray-600">
+                    <PinIcon className="h-4 w-4 shrink-0" />
+                    {guide.location}
+                  </p>
+                )}
+                {guide.rating != null && (
+                  <p className="mt-1 flex items-center gap-1 text-sm text-gray-600">
+                    <StarIcon className="h-4 w-4 shrink-0 text-gray-700" />
+                    {guide.rating} / 5
+                  </p>
+                )}
+                {guide.bio && (
+                  <p className="mt-3 text-gray-600">{guide.bio}</p>
+                )}
+                {guide.languages && guide.languages.length > 0 && (
+                  <div className="mt-3">
+                    <span className="text-sm font-medium text-gray-700">Languages: </span>
+                    <div className="mt-1 flex flex-wrap gap-2">
+                      {guide.languages.map((lang) => (
+                        <span
+                          key={lang}
+                          className="rounded-full border border-gray-300 bg-gray-50 px-3 py-0.5 text-sm text-gray-700"
+                        >
+                          {lang}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {guide.specialties && guide.specialties.length > 0 && (
+                  <div className="mt-3">
+                    <span className="text-sm font-medium text-gray-700">Specialties: </span>
+                    <div className="mt-1 flex flex-wrap gap-2">
+                      {guide.specialties.map((spec) => (
+                        <span
+                          key={spec}
+                          className="rounded-full border border-gray-300 bg-gray-50 px-3 py-0.5 text-sm text-gray-700"
+                        >
+                          {spec}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );
