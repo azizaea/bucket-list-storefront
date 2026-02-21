@@ -63,6 +63,13 @@ interface GuideStoreResponse {
   };
 }
 
+/** Split comma-separated values into individual tags (e.g. "Arabic, English" → ["Arabic", "English"]) */
+function splitTags(items: string[]): string[] {
+  return items
+    .flatMap((s) => s.split(",").map((t) => t.trim()))
+    .filter(Boolean);
+}
+
 function getInitials(name: string): string {
   return name
     .split(/\s+/)
@@ -213,13 +220,13 @@ export default async function StorePage({
       >
         {store.heroImageUrl && (
           <div
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-black/60"
             aria-hidden
           />
         )}
         <div className="relative z-10 max-w-2xl text-center">
           <h2 className="text-4xl font-bold text-white drop-shadow-lg md:text-5xl lg:text-6xl">
-            {guideName}
+            {storeName}
           </h2>
           {aboutText && (
             <p className="mt-4 text-lg text-white/95 drop-shadow md:text-xl">
@@ -265,7 +272,7 @@ export default async function StorePage({
                         </div>
                       )}
                     </div>
-                    <div className="p-4">
+                    <div className="p-5">
                       <h4 className="font-bold text-black">{tour.title}</h4>
                       <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
                         <span className="flex items-center gap-1">
@@ -277,7 +284,7 @@ export default async function StorePage({
                           Up to {tour.maxGuests} guests
                         </span>
                       </div>
-                      <p className="mt-3 font-bold text-black">
+                      <p className="mt-4 text-lg font-bold text-black">
                         From {tour.price} {tour.currency}
                       </p>
                     </div>
@@ -320,7 +327,7 @@ export default async function StorePage({
                   <div className="mt-4">
                     <span className="text-sm font-medium text-gray-700">Languages: </span>
                     <div className="mt-1 flex flex-wrap gap-2">
-                      {guide.languages.map((lang) => (
+                      {splitTags(guide.languages).map((lang) => (
                         <span
                           key={lang}
                           className="rounded-full border border-gray-300 bg-white px-3 py-0.5 text-sm text-gray-700"
@@ -335,7 +342,7 @@ export default async function StorePage({
                   <div className="mt-4">
                     <span className="text-sm font-medium text-gray-700">Specialties: </span>
                     <div className="mt-1 flex flex-wrap gap-2">
-                      {guide.specialties.map((spec) => (
+                      {splitTags(guide.specialties).map((spec) => (
                         <span
                           key={spec}
                           className="rounded-full border border-gray-300 bg-white px-3 py-0.5 text-sm text-gray-700"
