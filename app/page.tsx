@@ -1,8 +1,8 @@
 import { headers } from "next/headers";
 import Link from "next/link";
-import { fetchTours } from "@/lib/api";
-
-const API_BASE = "https://api.bucketlist.sa/api/guide-stores/public";
+import { StoreFooter } from "@/components/StoreFooter";
+import { StoreHeader } from "@/components/StoreHeader";
+import { fetchGuideStore, fetchTours } from "@/lib/api";
 
 function ClockIcon({ className }: { className?: string }) {
   return (
@@ -38,30 +38,6 @@ function PeopleIcon({ className }: { className?: string }) {
       />
     </svg>
   );
-}
-
-interface GuideStoreResponse {
-  success: boolean;
-  data: {
-    guide: {
-      fullName: string;
-      storeSlug: string;
-      licenseNumber?: string | null;
-      profilePictureUrl?: string | null;
-      location?: string | null;
-      rating?: number | null;
-      bio?: string | null;
-      languages?: string[];
-      specialties?: string[];
-    };
-    store: {
-      storeName: string;
-      logoUrl?: string | null;
-      primaryColor?: string;
-      heroImageUrl?: string | null;
-      aboutText?: string;
-    };
-  };
 }
 
 /** Split comma-separated values into individual tags (e.g. "Arabic, English" → ["Arabic", "English"]) */
@@ -102,22 +78,6 @@ function PinIcon({ className }: { className?: string }) {
       />
     </svg>
   );
-}
-
-async function fetchGuideStore(
-  slug: string
-): Promise<GuideStoreResponse["data"] | null> {
-  try {
-    const res = await fetch(`${API_BASE}/${slug}`, {
-      next: { revalidate: 60 },
-    });
-    if (!res.ok) return null;
-    const json: GuideStoreResponse = await res.json();
-    if (!json.success || !json.data) return null;
-    return json.data;
-  } catch {
-    return null;
-  }
 }
 
 function StoreNotFound() {
@@ -174,37 +134,7 @@ export default async function StorePage({
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Sticky Header */}
-      <header className="sticky top-0 z-50 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
-        <div className="flex items-center gap-3">
-          {store.logoUrl ? (
-            <img
-              src={store.logoUrl}
-              alt={storeName}
-              className="h-10 w-10 rounded-full object-cover"
-            />
-          ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-800 text-sm font-semibold text-white">
-              {getInitials(storeName)}
-            </div>
-          )}
-          <h1 className="text-lg font-bold text-black md:text-xl">{storeName}</h1>
-        </div>
-        <nav className="flex items-center gap-6">
-          <a
-            href="#tours"
-            className="text-sm font-medium text-gray-600 hover:text-black"
-          >
-            Tours
-          </a>
-          <a
-            href="#about"
-            className="text-sm font-medium text-gray-600 hover:text-black"
-          >
-            About
-          </a>
-        </nav>
-      </header>
+      <StoreHeader storeName={storeName} logoUrl={store.logoUrl} slug={slug} />
 
       {/* Hero Section */}
       <section
@@ -359,21 +289,7 @@ export default async function StorePage({
           </section>
         )}
 
-        {/* Footer */}
-        <footer className="border-t border-gray-200 bg-white px-6 py-8">
-          <div className="mx-auto max-w-4xl text-center">
-            <p className="font-semibold text-black">{storeName}</p>
-            {guide.licenseNumber && (
-              <p className="mt-1 text-sm text-gray-600">
-                🪪 Ministry of Tourism License: {guide.licenseNumber}
-              </p>
-            )}
-            <p className="mt-1 text-sm text-gray-500">Powered by Bucket List</p>
-            <p className="mt-4 text-xs text-gray-400">
-              © {new Date().getFullYear()} Bucket List. All rights reserved.
-            </p>
-          </div>
-        </footer>
+        <StoreFooter storeName={storeName} licenseNumber={guide.licenseNumber} />
       </main>
     </div>
   );
