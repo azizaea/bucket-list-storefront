@@ -138,7 +138,7 @@ export default async function StorePage({
 
       {/* Hero Section */}
       <section
-        className="relative flex min-h-[70vh] flex-col items-center justify-center px-6 py-20"
+        className="relative flex min-h-[70vh] flex-col items-center justify-center px-6 pt-20 pb-20"
         style={
           store.heroImageUrl
             ? {
