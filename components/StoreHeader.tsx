@@ -19,7 +19,7 @@ export function StoreHeader({ storeName, logoUrl, slug }: StoreHeaderProps) {
   const homeHref = slug ? `/?slug=${slug}` : "/";
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
+    <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
       <Link href={homeHref} className="flex items-center gap-3">
         {logoUrl ? (
           <img
