@@ -5,6 +5,7 @@ export interface GuideStoreData {
     fullName: string;
     storeSlug: string;
     licenseNumber?: string | null;
+    phone?: string | null;
     profilePictureUrl?: string | null;
     location?: string | null;
     bio?: string | null;

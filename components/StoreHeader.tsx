@@ -35,18 +35,18 @@ export function StoreHeader({ storeName, logoUrl, slug }: StoreHeaderProps) {
         <h1 className="text-lg font-bold text-black md:text-xl">{storeName}</h1>
       </Link>
       <nav className="flex items-center gap-6">
-        <a
+        <Link
           href={`${homeHref}#tours`}
           className="text-sm font-medium text-gray-600 hover:text-black"
         >
           Tours
-        </a>
-        <a
-          href={`${homeHref}#about`}
+        </Link>
+        <Link
+          href={slug ? `/about?slug=${slug}` : "/about"}
           className="text-sm font-medium text-gray-600 hover:text-black"
         >
           About
-        </a>
+        </Link>
       </nav>
     </header>
   );
